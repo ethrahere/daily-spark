@@ -62,8 +62,8 @@ export default function Home() {
     )
   }
 
-  // Show sign-in if no user and in MiniApp
-  if (!state.user && isInMiniApp) {
+  // Show sign-in if no user (both in MiniApp and regular browser)
+  if (!state.user) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-md mx-auto bg-white min-h-screen shadow-lg">
@@ -73,22 +73,41 @@ export default function Home() {
               Daily Spark
             </h1>
             <p className="text-gray-600 text-center mb-8">
-              Connect with your Farcaster account to join the daily conversation.
+              {isInMiniApp 
+                ? "Connect with your Farcaster account to join the daily conversation."
+                : "Connect your account to participate in Daily Spark."
+              }
             </p>
             <button
               onClick={signIn}
-              className="px-8 py-4 bg-[#0052FF] text-white rounded-2xl text-lg font-medium hover:bg-[#0052FF]/90 transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
+              disabled={authLoading}
+              className="px-8 py-4 bg-[#0052FF] text-white rounded-2xl text-lg font-medium hover:bg-[#0052FF]/90 transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
-              Connect Account
+              {authLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <span>🔗</span>
+                  <span>{isInMiniApp ? "Connect Farcaster" : "Connect Account"}</span>
+                </>
+              )}
             </button>
+            {isInMiniApp && (
+              <p className="text-xs text-gray-500 text-center mt-4">
+                You'll be prompted to connect your Farcaster profile
+              </p>
+            )}
           </div>
         </div>
       </div>
     )
   }
 
-  // Show error if no user outside MiniApp
-  if (!state.user || !state.todaysQuestion) {
+  // Show loading if no question
+  if (!state.todaysQuestion) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

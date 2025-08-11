@@ -93,6 +93,24 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
         </div>
       </div>
 
+      {/* Column Headers */}
+      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 text-center text-sm font-medium text-gray-600">Rank</div>
+          <div className="flex-1 text-sm font-medium text-gray-600">Player</div>
+          <div className="flex items-center space-x-8 text-sm font-medium text-gray-600">
+            <span className="flex items-center space-x-1">
+              <span>💎</span>
+              <span>Tokens</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <span>❤️</span>
+              <span>Popular</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Leaderboard */}
       <div className="space-y-3">
         {sortedLeaderboard.map((entry, index) => {
@@ -135,16 +153,18 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                    <span>💎 {tokens.toLocaleString()} tokens</span>
-                    <span>❤️ {entry.popularAnswers} popular answers</span>
-                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center space-x-8 text-sm">
+                  <span className="font-medium text-gray-900">{tokens.toLocaleString()}</span>
+                  <span className="font-medium text-gray-900">{entry.popularAnswers}</span>
                 </div>
 
                 {/* Trend */}
                 {rank <= 3 && (
-                  <div className="text-right">
-                    <div className="text-2xl mb-1">
+                  <div className="text-right ml-4">
+                    <div className="text-2xl">
                       {rank === 1 ? '👑' : rank === 2 ? '🌟' : '✨'}
                     </div>
                   </div>

@@ -43,47 +43,79 @@ export function useApp() {
     const initializeAuth = async () => {
       setAuthLoading(true)
       
-      if (isInMiniApp && context?.user) {
-        // User is authenticated via MiniKit
-        const farcasterUser: User = {
-          id: context.user.fid.toString(),
-          username: context.user.username || `user-${context.user.fid}`,
-          avatar: context.user.pfpUrl || '👤',
-          farcasterFid: context.user.fid,
-          tokens: 150, // In production, fetch from backend
-          streak: 7,   // In production, fetch from backend
-          hasAnsweredToday: false,
-          totalUpvotesReceived: 12,
-          totalUpvotesGiven: 8,
-          earlyBirdCount: 3,
-          walletAddress: undefined
+      try {
+        if (isInMiniApp) {
+          if (context?.user) {
+            // User is already authenticated via MiniKit
+            const farcasterUser: User = {
+              id: context.user.fid.toString(),
+              username: context.user.username || `user-${context.user.fid}`,
+              avatar: context.user.pfpUrl || '👤',
+              farcasterFid: context.user.fid,
+              tokens: 150, // In production, fetch from backend
+              streak: 7,   // In production, fetch from backend
+              hasAnsweredToday: false,
+              totalUpvotesReceived: 12,
+              totalUpvotesGiven: 8,
+              earlyBirdCount: 3,
+              walletAddress: undefined
+            }
+            
+            setState(prev => ({
+              ...prev,
+              user: farcasterUser
+            }))
+          } else {
+            // User is in MiniApp but not authenticated - show login
+            setState(prev => ({
+              ...prev,
+              user: null
+            }))
+          }
+        } else {
+          // Fallback for development/testing outside MiniKit
+          setState(prev => ({
+            ...prev,
+            user: mockUser
+          }))
         }
-        
+      } catch (error) {
+        console.error('Authentication initialization error:', error)
+        // Fallback to null user to show login
         setState(prev => ({
           ...prev,
-          user: farcasterUser
-        }))
-      } else if (!isInMiniApp) {
-        // Fallback for development/testing outside MiniKit
-        
-        setState(prev => ({
-          ...prev,
-          user: mockUser
+          user: null
         }))
       }
       
       setAuthLoading(false)
     }
 
-    initializeAuth()
+    // Add a small delay to ensure MiniKit context is fully loaded
+    const timer = setTimeout(initializeAuth, 200)
+    return () => clearTimeout(timer)
   }, [context, isInMiniApp])
 
   const signIn = async () => {
     try {
       setAuthLoading(true)
-      await authenticateSignIn()
+      
+      if (isInMiniApp) {
+        // Trigger Farcaster authentication in MiniApp
+        const result = await authenticateSignIn()
+        console.log('Authentication result:', result)
+        
+        // The useEffect will handle updating the user state when context changes
+      } else {
+        // Fallback for development
+        setState(prev => ({
+          ...prev,
+          user: mockUser
+        }))
+      }
     } catch (error) {
       console.error('Authentication failed:', error)
+      // Don't set user to null here, let the user try again
     } finally {
       setAuthLoading(false)
     }
