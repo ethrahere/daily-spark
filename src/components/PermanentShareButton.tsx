@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useMiniKit } from '@coinbase/onchainkit/minikit'
+import { useComposeCast } from '@coinbase/onchainkit/minikit'
 import { Answer, Question } from '@/types'
 
 interface PermanentShareButtonProps {
@@ -17,7 +17,7 @@ export default function PermanentShareButton({
 }: PermanentShareButtonProps) {
   const [isSharing, setIsSharing] = useState(false)
   const [hasShared, setHasShared] = useState(false)
-  const { context } = useMiniKit()
+  const { composeCast } = useComposeCast()
 
   if (!answer || !question) return null
 
@@ -30,8 +30,8 @@ export default function PermanentShareButton({
       const shareText = `Just answered today's Daily Spark question! ✨\n\n"${question.text}"\n\nCurious about my answer? Join the conversation and see what everyone thinks! 🤔💭\n\n${window.location.origin}`
 
       // Try different sharing approaches
-      if (context?.actions?.composeCast) {
-        await context.actions.composeCast({
+      if (composeCast) {
+        await composeCast({
           text: shareText
         })
       } else if (window.parent && window.parent !== window) {
