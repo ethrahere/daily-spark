@@ -8,9 +8,9 @@
   "miniapp": {
     "version": "1",
     "name": "Daily Spark",
-    "homeUrl": "https://daily-spark-ibg2071vl-ethras-projects-54a2c526.vercel.app",
-    "iconUrl": "https://daily-spark-ibg2071vl-ethras-projects-54a2c526.vercel.app/icon.svg",
-    "splashImageUrl": "https://daily-spark-ibg2071vl-ethras-projects-54a2c526.vercel.app/icon.svg",
+    "homeUrl": "https://daily-spark-brown.vercel.app",
+    "iconUrl": "https://daily-spark-brown.vercel.app/icon.svg",
+    "splashImageUrl": "https://daily-spark-brown.vercel.app/icon.svg",
     "splashBackgroundColor": "#0052FF",
     "subtitle": "Question of the Day",
     "description": "A minimal Question of the Day app where you answer questions and discover insights from the community.",
