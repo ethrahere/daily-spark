@@ -32,12 +32,22 @@ export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
     const initializeFrameSDK = async () => {
       try {
+        // Wait for DOM to be fully loaded
+        await new Promise(resolve => setTimeout(resolve, 500))
         await sdk.actions.ready()
+        console.log('MiniKit SDK ready called successfully')
       } catch (error) {
         console.error('Frame SDK initialization error:', error)
       }
     }
-    initializeFrameSDK()
+    
+    // Call ready when the document is ready
+    if (document.readyState === 'complete') {
+      initializeFrameSDK()
+    } else {
+      window.addEventListener('load', initializeFrameSDK)
+      return () => window.removeEventListener('load', initializeFrameSDK)
+    }
   }, [])
 
   return (

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
 import { useApp } from '@/hooks/useApp'
+import sdk from '@farcaster/miniapp-sdk'
 import QuestionCard from '@/components/QuestionCard'
 import AnswerInput from '@/components/AnswerInput'
 import StatusBar from '@/components/StatusBar'
@@ -33,6 +34,21 @@ export default function Home() {
 
   const { isConnected } = useAccount()
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  // Ensure MiniKit SDK is ready after app loads
+  useEffect(() => {
+    const ensureReady = async () => {
+      try {
+        if (state.user && state.todaysQuestion && !authLoading) {
+          await sdk.actions.ready()
+          console.log('MiniKit SDK ready called from main app')
+        }
+      } catch (error) {
+        console.error('Error calling SDK ready from main app:', error)
+      }
+    }
+    ensureReady()
+  }, [state.user, state.todaysQuestion, authLoading])
 
   // Show loading during authentication
   if (authLoading) {
