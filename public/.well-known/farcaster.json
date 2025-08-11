@@ -1,19 +1,20 @@
 {
-  "accountAssociation": {
-    "header": "PLACEHOLDER_HEADER",
-    "payload": "PLACEHOLDER_PAYLOAD", 
-    "signature": "PLACEHOLDER_SIGNATURE"
-  },
+    "accountAssociation": {
+      "header": "eyJmaWQiOjEwMDEzMTMsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgyNEQ1QkM2MDlmYUM3RDg5Njk3ZjFmMDYyMjQ4MjZjZmNmMDJjMzE4In0",
+      "payload": "eyJkb21haW4iOiJkYWlseS1zcGFyay1icm93bi52ZXJjZWwuYXBwIn0",
+      "signature": "MHgwMDNhZmM2ZWQyMDdmYjQ3Y2E5Mzc4MGNkOGQ0N2Q1MjMzMjk3OTU0MGM0ZjY1MmM4MjNhNTUwOTE5OWY4YmFjNDQ0YTQzY2YwMThkOTRiYTVmMzE0NzY5MTIwOTM0MWI1YmI4ZDQ5Zjc5Zjg5MzdjMjIzMjU2NmZiNmQyYzZlYjFj"
+    }
+  ,
   "miniapp": {
     "version": "1",
     "name": "Daily Spark",
-    "homeUrl": "https://daily-spark-base.vercel.app",
-    "iconUrl": "https://daily-spark-base.vercel.app/icon.svg",
-    "splashImageUrl": "https://daily-spark-base.vercel.app/icon.svg",
+    "homeUrl": "https://daily-spark-ibg2071vl-ethras-projects-54a2c526.vercel.app",
+    "iconUrl": "https://daily-spark-ibg2071vl-ethras-projects-54a2c526.vercel.app/icon.svg",
+    "splashImageUrl": "https://daily-spark-ibg2071vl-ethras-projects-54a2c526.vercel.app/icon.svg",
     "splashBackgroundColor": "#0052FF",
     "subtitle": "Question of the Day",
-    "description": "A minimal Question of the Day app where you answer thoughtful questions and discover insights from the community. Share your daily spark and earn tokens for meaningful contributions.",
+    "description": "A minimal Question of the Day app where you answer questions and discover insights from the community.",
     "primaryCategory": "social",
-    "tags": ["social", "base", "questions", "community", "daily", "spark", "tokens"]
+    "tags": "social"
   }
 }
