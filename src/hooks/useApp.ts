@@ -12,7 +12,7 @@ import {
   calculateTokenReward,
   mockUser
 } from '@/lib/mockData'
-import { useMiniKit, useIsInMiniApp, useAuthenticate } from '@coinbase/onchainkit/minikit'
+import { useMiniKit, useIsInMiniApp } from '@coinbase/onchainkit/minikit'
 
 export function useApp() {
   const [state, setState] = useState<AppState>({
@@ -31,12 +31,9 @@ export function useApp() {
   const [authLoading, setAuthLoading] = useState(true)
 
   // MiniKit hooks
-  const { context } = useMiniKit()
+  const minikit = useMiniKit()
   const isInMiniAppResult = useIsInMiniApp()
   const isInMiniApp = isInMiniAppResult.isInMiniApp || false
-  const { signIn: authenticateSignIn } = useAuthenticate(
-    process.env.NEXT_PUBLIC_APP_DOMAIN || 'daily-spark-base.vercel.app'
-  )
 
   // Initialize authentication
   useEffect(() => {
@@ -44,39 +41,41 @@ export function useApp() {
       setAuthLoading(true)
       
       try {
-        if (isInMiniApp) {
-          if (context?.user) {
-            // User is already authenticated via MiniKit
-            const farcasterUser: User = {
-              id: context.user.fid.toString(),
-              username: context.user.username || `user-${context.user.fid}`,
-              avatar: context.user.pfpUrl || '👤',
-              farcasterFid: context.user.fid,
-              tokens: 150, // In production, fetch from backend
-              streak: 7,   // In production, fetch from backend
-              hasAnsweredToday: false,
-              totalUpvotesReceived: 12,
-              totalUpvotesGiven: 8,
-              earlyBirdCount: 3,
-              walletAddress: undefined
-            }
-            
-            setState(prev => ({
-              ...prev,
-              user: farcasterUser
-            }))
-          } else {
-            // User is in MiniApp but not authenticated - show login
-            setState(prev => ({
-              ...prev,
-              user: null
-            }))
+        console.log('Auth initialization:', { isInMiniApp, context: minikit.context })
+        
+        if (isInMiniApp && minikit.context?.user) {
+          // User is already authenticated via MiniKit
+          console.log('User authenticated via MiniKit:', minikit.context.user)
+          const farcasterUser: User = {
+            id: minikit.context.user.fid.toString(),
+            username: minikit.context.user.username || `user-${minikit.context.user.fid}`,
+            avatar: minikit.context.user.pfpUrl || '👤',
+            farcasterFid: minikit.context.user.fid,
+            tokens: 150, // In production, fetch from backend
+            streak: 7,   // In production, fetch from backend
+            hasAnsweredToday: false,
+            totalUpvotesReceived: 12,
+            totalUpvotesGiven: 8,
+            earlyBirdCount: 3,
+            walletAddress: undefined
           }
-        } else {
+          
+          setState(prev => ({
+            ...prev,
+            user: farcasterUser
+          }))
+        } else if (!isInMiniApp) {
           // Fallback for development/testing outside MiniKit
           setState(prev => ({
             ...prev,
             user: mockUser
+          }))
+        } else {
+          // User is in MiniApp but not authenticated - show login
+          console.log('User not authenticated, showing login screen')
+          setState(prev => ({
+            ...prev,
+            user: null
           }))
         }
       } catch (error) {
@@ -92,18 +91,18 @@ export function useApp() {
     }
 
     // Add a small delay to ensure MiniKit context is fully loaded
-    const timer = setTimeout(initializeAuth, 200)
+    const timer = setTimeout(initializeAuth, 300)
     return () => clearTimeout(timer)
-  }, [context, isInMiniApp])
+  }, [minikit.context, isInMiniApp])
 
   const signIn = async () => {
     try {
       setAuthLoading(true)
       
       if (isInMiniApp) {
-        // Trigger Farcaster authentication in MiniApp
-        const result = await authenticateSignIn()
-        console.log('Authentication result:', result)
+        // Request authentication using MiniKit
+        const authResult = await minikit.actions.authenticate()
+        console.log('Authentication result:', authResult)
         
         // The useEffect will handle updating the user state when context changes
       } else {

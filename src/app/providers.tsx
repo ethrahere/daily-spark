@@ -32,21 +32,25 @@ export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
     const initializeFrameSDK = async () => {
       try {
-        // Wait for DOM to be fully loaded
-        await new Promise(resolve => setTimeout(resolve, 500))
-        await sdk.actions.ready()
-        console.log('MiniKit SDK ready called successfully')
+        // Ensure DOM is ready before calling SDK ready
+        if (typeof window !== 'undefined') {
+          await new Promise(resolve => setTimeout(resolve, 100))
+          await sdk.actions.ready()
+          console.log('MiniKit SDK ready called successfully')
+        }
       } catch (error) {
         console.error('Frame SDK initialization error:', error)
       }
     }
     
-    // Call ready when the document is ready
-    if (document.readyState === 'complete') {
-      initializeFrameSDK()
-    } else {
-      window.addEventListener('load', initializeFrameSDK)
-      return () => window.removeEventListener('load', initializeFrameSDK)
+    // Initialize immediately if DOM is ready, otherwise wait
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initializeFrameSDK()
+      } else {
+        document.addEventListener('DOMContentLoaded', initializeFrameSDK)
+        return () => document.removeEventListener('DOMContentLoaded', initializeFrameSDK)
+      }
     }
   }, [])
 
