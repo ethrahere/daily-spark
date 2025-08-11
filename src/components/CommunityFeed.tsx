@@ -20,7 +20,7 @@ export default function CommunityFeed({
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-light text-gray-900 mb-2">
-          💬 What everyone's saying
+          💬 What everyone&apos;s saying
         </h2>
         <p className="text-gray-500">
           {answers.length} spark{answers.length !== 1 ? 's' : ''} shared today
