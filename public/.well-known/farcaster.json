@@ -15,6 +15,6 @@
     "subtitle": "Question of the Day",
     "description": "A minimal Question of the Day app where you answer questions and discover insights from the community.",
     "primaryCategory": "social",
-    "tags": "social"
+    "tags": ["social"]
   }
 }
