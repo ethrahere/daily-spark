@@ -1,0 +1,26 @@
+{
+  "name": "daily-spark",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "rewrites": [
+    {
+      "source": "/((?!\\.well-known).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/farcaster.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Access-Control-Allow-Origin", 
+          "value": "*"
+        }
+      ]
+    }
+  ]
+}

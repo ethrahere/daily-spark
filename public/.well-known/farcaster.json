@@ -1,0 +1,19 @@
+{
+  "accountAssociation": {
+    "header": "PLACEHOLDER_HEADER",
+    "payload": "PLACEHOLDER_PAYLOAD", 
+    "signature": "PLACEHOLDER_SIGNATURE"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Daily Spark",
+    "homeUrl": "https://daily-spark-base.vercel.app",
+    "iconUrl": "https://daily-spark-base.vercel.app/icon.svg",
+    "splashImageUrl": "https://daily-spark-base.vercel.app/icon.svg",
+    "splashBackgroundColor": "#0052FF",
+    "subtitle": "Question of the Day",
+    "description": "A minimal Question of the Day app where you answer thoughtful questions and discover insights from the community. Share your daily spark and earn tokens for meaningful contributions.",
+    "primaryCategory": "social",
+    "tags": ["social", "base", "questions", "community", "daily", "spark", "tokens"]
+  }
+}
