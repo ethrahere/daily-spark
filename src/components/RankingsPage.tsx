@@ -20,12 +20,7 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
   const userRank = sortedLeaderboard.findIndex(entry => entry.user.id === currentUserId) + 1
 
   const getRankIcon = (rank: number) => {
-    switch(rank) {
-      case 1: return '🥇'
-      case 2: return '🥈'
-      case 3: return '🥉'
-      default: return `#${rank}`
-    }
+    return `#${rank}`
   }
 
   return (
@@ -33,7 +28,7 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
       {/* Header */}
       <div className="text-center py-6">
         <h1 className="text-3xl font-light text-gray-900 mb-2">
-          🏆 Rankings
+          Rankings
         </h1>
         <p className="text-gray-600">
           Top contributors in the Daily Spark community
@@ -55,7 +50,7 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          🏆 All Time
+          All Time
         </button>
         <button
           onClick={() => setActiveTab('weekly')}
@@ -65,28 +60,28 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          🔥 This Week
+          This Week
         </button>
       </div>
 
       {/* Prize Info */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
         <h2 className="text-lg font-semibold text-gray-900 mb-3 text-center">
-          🎁 Weekly Rewards
+          Weekly Rewards
         </h2>
         <div className="grid grid-cols-3 gap-3 text-center text-sm">
           <div>
-            <div className="text-2xl mb-1">🥇</div>
+            <div className="text-lg font-bold mb-1">#1</div>
             <div className="font-semibold">1st Place</div>
             <div className="text-xs text-gray-600">500 bonus tokens</div>
           </div>
           <div>
-            <div className="text-2xl mb-1">🥈</div>
+            <div className="text-lg font-bold mb-1">#2</div>
             <div className="font-semibold">2nd Place</div>
             <div className="text-xs text-gray-600">300 bonus tokens</div>
           </div>
           <div>
-            <div className="text-2xl mb-1">🥉</div>
+            <div className="text-lg font-bold mb-1">#3</div>
             <div className="font-semibold">3rd Place</div>
             <div className="text-xs text-gray-600">200 bonus tokens</div>
           </div>
@@ -99,14 +94,8 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
           <div className="w-12 text-center text-sm font-medium text-gray-600">Rank</div>
           <div className="flex-1 text-sm font-medium text-gray-600">Player</div>
           <div className="flex items-center space-x-8 text-sm font-medium text-gray-600">
-            <span className="flex items-center space-x-1">
-              <span>💎</span>
-              <span>Tokens</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <span>❤️</span>
-              <span>Popular</span>
-            </span>
+            <span>Tokens</span>
+            <span>Popular</span>
           </div>
         </div>
       </div>
@@ -131,7 +120,7 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
                 {/* Rank */}
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold ${
                   rank <= 3 
-                    ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-800'
+                    ? 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800'
                     : 'bg-gray-100 text-gray-600'
                 }`}>
                   {getRankIcon(rank)}
@@ -147,11 +136,6 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
                       {entry.user.username}
                       {isCurrentUser && <span className="text-sm ml-1">(You)</span>}
                     </h3>
-                    {entry.user.streak >= 7 && (
-                      <div className="text-sm bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
-                        🔥{entry.user.streak}
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -161,14 +145,6 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
                   <span className="font-medium text-gray-900">{entry.popularAnswers}</span>
                 </div>
 
-                {/* Trend */}
-                {rank <= 3 && (
-                  <div className="text-right ml-4">
-                    <div className="text-2xl">
-                      {rank === 1 ? '👑' : rank === 2 ? '🌟' : '✨'}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )

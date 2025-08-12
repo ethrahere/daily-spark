@@ -9,8 +9,7 @@ import {
   getRecentAnswers,
   mockLeaderboard,
   mockTokenRewards,
-  calculateTokenReward,
-  mockUser
+  calculateTokenReward
 } from '@/lib/mockData'
 import { useMiniKit, useIsInMiniApp } from '@coinbase/onchainkit/minikit'
 
@@ -66,9 +65,10 @@ export function useApp() {
           }))
         } else if (!isInMiniApp) {
           // Fallback for development/testing outside MiniKit
+          // No mock user - show sign-in
           setState(prev => ({
             ...prev,
-            user: mockUser
+            user: null
           }))
         } else {
           // User is in MiniApp but not authenticated - show login
@@ -106,10 +106,10 @@ export function useApp() {
         
         // The useEffect will handle updating the user state when context changes
       } else {
-        // Fallback for development
+        // Fallback for development - no mock user
         setState(prev => ({
           ...prev,
-          user: mockUser
+          user: null
         }))
       }
     } catch (error) {
