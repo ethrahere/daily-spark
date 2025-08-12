@@ -337,6 +337,10 @@ export async function addTokenReward(userId: string, reward: Omit<TokenReward, '
 }
 
 export async function getUserTokenRewards(userId: string): Promise<TokenReward[]> {
+  if (!isSupabaseConfigured || !supabase) {
+    return []
+  }
+
   try {
     const { data, error } = await supabase
       .from('token_rewards')
@@ -359,24 +363,57 @@ export async function getUserTokenRewards(userId: string): Promise<TokenReward[]
 
 // Leaderboard
 export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
+  if (!isSupabaseConfigured || !supabase) {
+    return []
+  }
+
   try {
-    const { data, error } = await supabase
+    // Get users with their token counts and weekly tokens
+    const { data: users, error: usersError } = await supabase
       .from('users')
       .select('*')
       .order('tokens', { ascending: false })
       .limit(50)
 
-    if (error) {
-      console.error('Error getting leaderboard:', error)
+    if (usersError) {
+      console.error('Error getting leaderboard users:', usersError)
       return []
     }
 
-    return data.map((user, index) => ({
+    // Get weekly token rewards for each user
+    const weekStart = new Date()
+    weekStart.setDate(weekStart.getDate() - 7)
+    
+    const { data: weeklyRewards } = await supabase
+      .from('token_rewards')
+      .select('user_id, amount')
+      .gte('created_at', weekStart.toISOString())
+
+    // Get popular answers count (answers with 5+ likes)
+    const { data: popularAnswers } = await supabase
+      .from('answers')
+      .select('user_id')
+      .gte('likes', 5)
+
+    // Process data
+    const weeklyTokensByUser = new Map<string, number>()
+    weeklyRewards?.forEach(reward => {
+      const current = weeklyTokensByUser.get(reward.user_id) || 0
+      weeklyTokensByUser.set(reward.user_id, current + reward.amount)
+    })
+
+    const popularAnswersByUser = new Map<string, number>()
+    popularAnswers?.forEach(answer => {
+      const current = popularAnswersByUser.get(answer.user_id) || 0
+      popularAnswersByUser.set(answer.user_id, current + 1)
+    })
+
+    return users.map((user, index) => ({
       user: dbUserToUser(user),
       rank: index + 1,
       totalTokens: user.tokens,
-      weeklyTokens: 0, // TODO: Calculate from token_rewards
-      popularAnswers: 0 // TODO: Calculate from answers with high likes
+      weeklyTokens: weeklyTokensByUser.get(user.id) || 0,
+      popularAnswers: popularAnswersByUser.get(user.id) || 0
     }))
   } catch (error) {
     console.error('Error in getLeaderboard:', error)

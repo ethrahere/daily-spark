@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Answer } from '@/types'
+import BaseUser from './BaseUser'
 
 interface AnswerCardProps {
   answer: Answer
@@ -36,15 +37,23 @@ export default function AnswerCard({ answer, onLike }: AnswerCardProps) {
       answer.isOwnAnswer ? 'border-[#0052FF]/20 bg-[#0052FF]/5' : 'border-gray-100'
     }`}>
       <div className="flex items-start space-x-3 mb-4">
-        <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">
-          {answer.avatar || '👤'}
-        </div>
+        <BaseUser
+          username={answer.username}
+          avatar={answer.avatar}
+          showAvatar={true}
+          showName={false}
+          avatarClassName="w-10 h-10"
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
-            <h3 className="font-medium text-gray-900 truncate">
-              {answer.username}
-              {answer.isOwnAnswer && <span className="text-[#0052FF] ml-1">(You)</span>}
-            </h3>
+            <BaseUser
+              username={answer.username}
+              avatar={answer.avatar}
+              showAvatar={false}
+              showName={true}
+              nameClassName="font-medium text-gray-900 truncate"
+            />
+            {answer.isOwnAnswer && <span className="text-[#0052FF] ml-1">(You)</span>}
             <span className="text-gray-500 text-sm">·</span>
             <span className="text-gray-500 text-sm">{formatTime(answer.createdAt)}</span>
           </div>

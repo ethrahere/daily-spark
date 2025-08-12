@@ -7,23 +7,32 @@ import {
   mockCommunityAnswers, 
   getPopularAnswers, 
   getRecentAnswers,
-  mockLeaderboard,
-  mockTokenRewards,
   calculateTokenReward
 } from '@/lib/mockData'
+import { 
+  getLeaderboard,
+  getUserTokenRewards,
+  getTodaysQuestion,
+  getCommunityAnswers,
+  createOrUpdateUser,
+  submitAnswer as submitAnswerToDb,
+  addTokenReward
+} from '@/lib/supabaseService'
 import { useMiniKit, useIsInMiniApp } from '@coinbase/onchainkit/minikit'
 
 export function useApp() {
   const [state, setState] = useState<AppState>({
     user: null,
-    todaysQuestion: todaysQuestion,
+    todaysQuestion: null,
     userAnswer: null,
-    communityAnswers: mockCommunityAnswers,
+    communityAnswers: [],
     hasAnswered: false,
     showCommunity: false,
     currentTab: 'home',
-    tokenRewards: mockTokenRewards
+    tokenRewards: []
   })
+  
+  const [leaderboard, setLeaderboard] = useState<any[]>([])
 
   const [feedTab, setFeedTab] = useState<FeedTab>('popular')
   const [loading, setLoading] = useState(false)
@@ -45,24 +54,26 @@ export function useApp() {
         if (isInMiniApp && minikit.context?.user) {
           // User is already authenticated via MiniKit
           console.log('User authenticated via MiniKit:', minikit.context.user)
-          const farcasterUser: User = {
-            id: minikit.context.user.fid.toString(),
+          // Create or update user in database
+          const dbUser = await createOrUpdateUser({
             username: minikit.context.user.username || `user-${minikit.context.user.fid}`,
-            avatar: minikit.context.user.pfpUrl || '👤',
             farcasterFid: minikit.context.user.fid,
-            tokens: 150, // In production, fetch from backend
-            streak: 7,   // In production, fetch from backend
-            hasAnsweredToday: false,
-            totalUpvotesReceived: 12,
-            totalUpvotesGiven: 8,
-            earlyBirdCount: 3,
-            walletAddress: undefined
-          }
+            avatar: minikit.context.user.pfpUrl || '👤'
+          })
           
-          setState(prev => ({
-            ...prev,
-            user: farcasterUser
-          }))
+          if (dbUser) {
+            setState(prev => ({
+              ...prev,
+              user: dbUser
+            }))
+            
+            // Load user's token rewards
+            const rewards = await getUserTokenRewards(dbUser.id)
+            setState(prev => ({
+              ...prev,
+              tokenRewards: rewards
+            }))
+          }
         } else if (!isInMiniApp) {
           // Fallback for development/testing outside MiniKit
           // No mock user - show sign-in
@@ -94,6 +105,35 @@ export function useApp() {
     const timer = setTimeout(initializeAuth, 300)
     return () => clearTimeout(timer)
   }, [minikit.context, isInMiniApp])
+  
+  // Load initial data
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        // Load today's question
+        const question = await getTodaysQuestion() || todaysQuestion
+        setState(prev => ({ ...prev, todaysQuestion: question }))
+        
+        // Load community answers if we have a question
+        if (question) {
+          const answers = await getCommunityAnswers(question.id)
+          setState(prev => ({ 
+            ...prev, 
+            communityAnswers: answers,
+            showCommunity: answers.length > 0
+          }))
+        }
+        
+        // Load leaderboard
+        const leaderboardData = await getLeaderboard()
+        setLeaderboard(leaderboardData)
+      } catch (error) {
+        console.error('Error loading initial data:', error)
+      }
+    }
+    
+    loadInitialData()
+  }, [])
 
   const signIn = async () => {
     try {
@@ -125,53 +165,63 @@ export function useApp() {
 
     setLoading(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800))
-
-    const newAnswer: Answer = {
-      id: 'user-answer-' + Date.now(),
-      questionId: state.todaysQuestion.id,
-      userId: state.user.id,
-      username: state.user.username,
-      avatar: state.user.avatar,
-      text: answerText,
-      likes: 0,
-      createdAt: new Date().toISOString(),
-      isOwnAnswer: true
+    try {
+      // Submit answer to database
+      const newAnswer = await submitAnswerToDb(
+        state.todaysQuestion.id, 
+        state.user.id, 
+        answerText
+      )
+      
+      if (newAnswer) {
+        // Calculate token rewards
+        const answerCount = state.communityAnswers.length + 1
+        const { baseReward, bonuses } = calculateTokenReward(state.user, answerCount, state.communityAnswers.length)
+        
+        // Add token rewards to database
+        await addTokenReward(state.user.id, {
+          type: 'answer',
+          amount: baseReward,
+          description: 'Answered today\'s question'
+        })
+        
+        for (const bonus of bonuses) {
+          await addTokenReward(state.user.id, bonus)
+        }
+        
+        // Update local state
+        const totalTokens = baseReward + bonuses.reduce((sum, bonus) => sum + bonus.amount, 0)
+        const updatedUser = {
+          ...state.user,
+          tokens: state.user.tokens + totalTokens,
+          hasAnsweredToday: true
+        }
+        
+        const newRewards = [
+          { type: 'answer' as const, amount: baseReward, description: 'Answered today\'s question', timestamp: new Date().toISOString() },
+          ...bonuses
+        ]
+        
+        // Add the "isOwnAnswer" flag to the answer
+        const ownAnswer = { ...newAnswer, isOwnAnswer: true }
+        
+        setState(prev => ({
+          ...prev,
+          user: updatedUser,
+          userAnswer: ownAnswer,
+          communityAnswers: [ownAnswer, ...prev.communityAnswers],
+          hasAnswered: true,
+          showCommunity: true,
+          tokenRewards: [...newRewards, ...prev.tokenRewards]
+        }))
+        
+        // Refresh leaderboard
+        const leaderboardData = await getLeaderboard()
+        setLeaderboard(leaderboardData)
+      }
+    } catch (error) {
+      console.error('Error submitting answer:', error)
     }
-
-    // Calculate token rewards with enhanced system
-    const answerCount = state.communityAnswers.length + 1 // +1 for current answer
-    const { baseReward, bonuses } = calculateTokenReward(state.user, answerCount, state.communityAnswers.length)
-    const totalTokens = baseReward + bonuses.reduce((sum, bonus) => sum + bonus.amount, 0)
-
-    // Update user with enhanced stats
-    const updatedUser = {
-      ...state.user,
-      tokens: state.user.tokens + totalTokens,
-      streak: state.user.streak + 1,
-      hasAnsweredToday: true,
-      earlyBirdCount: answerCount <= 10 ? state.user.earlyBirdCount + 1 : state.user.earlyBirdCount
-    }
-
-    // Add answer to community (at the top for recent view)
-    const updatedCommunityAnswers = [newAnswer, ...state.communityAnswers]
-
-    // Add reward records
-    const newRewards = [
-      { type: 'answer' as const, amount: baseReward, description: 'Answered today\'s question', timestamp: new Date().toISOString() },
-      ...bonuses
-    ]
-
-    setState(prev => ({
-      ...prev,
-      user: updatedUser,
-      userAnswer: newAnswer,
-      communityAnswers: updatedCommunityAnswers,
-      hasAnswered: true,
-      showCommunity: true,
-      tokenRewards: [...newRewards, ...prev.tokenRewards]
-    }))
 
     setLoading(false)
   }
@@ -261,6 +311,6 @@ export function useApp() {
     isInMiniApp,
     setAppTab,
     addTokenReward,
-    leaderboard: mockLeaderboard
+    leaderboard
   }
 }

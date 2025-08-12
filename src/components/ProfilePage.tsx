@@ -3,6 +3,7 @@
 import React from 'react'
 import { User, TokenReward } from '@/types'
 import WalletConnect from './WalletConnect'
+import BaseUser from './BaseUser'
 
 interface ProfilePageProps {
   user: User
@@ -33,21 +34,31 @@ export default function ProfilePage({ user, tokenRewards }: ProfilePageProps) {
       {/* Profile Header */}
       <div className="text-center py-6">
         <div className="w-20 h-20 bg-gradient-to-br from-[#0052FF] to-[#0052FF]/60 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto overflow-hidden">
-          {walletInfo.avatar ? (
-            <img src={walletInfo.avatar} alt="Avatar" className="w-full h-full object-cover" />
-          ) : (
-            user.avatar || '👤'
-          )}
+          <BaseUser
+            address={walletInfo.address || user.walletAddress}
+            username={user.username}
+            avatar={user.avatar}
+            showName={false}
+            showAvatar={true}
+            avatarClassName="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-          {walletInfo.name || user.username}
-        </h1>
+        <div className="mb-4">
+          <BaseUser
+            address={walletInfo.address || user.walletAddress}
+            username={user.username}
+            avatar={user.avatar}
+            showName={true}
+            showAvatar={false}
+            nameClassName="text-2xl font-semibold text-gray-900"
+          />
+        </div>
         <p className="text-gray-600">
           Sparking conversations since joining
         </p>
-        {walletInfo.address && (
+        {(walletInfo.address || user.walletAddress) && (
           <p className="text-sm text-gray-500 mt-2 font-mono">
-            {walletInfo.address.slice(0, 6)}...{walletInfo.address.slice(-4)}
+            {(walletInfo.address || user.walletAddress)?.slice(0, 6)}...{(walletInfo.address || user.walletAddress)?.slice(-4)}
           </p>
         )}
       </div>

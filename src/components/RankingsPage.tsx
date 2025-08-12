@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { LeaderboardEntry } from '@/types'
+import BaseUser from './BaseUser'
 
 interface RankingsPageProps {
   leaderboard: LeaderboardEntry[]
@@ -102,7 +103,14 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
 
       {/* Leaderboard */}
       <div className="space-y-3">
-        {sortedLeaderboard.map((entry, index) => {
+        {sortedLeaderboard.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">🏆</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No rankings yet</h3>
+            <p className="text-gray-600">Be the first to answer today's question and climb the leaderboard!</p>
+          </div>
+        ) : (
+          sortedLeaderboard.map((entry, index) => {
           const rank = index + 1
           const isCurrentUser = entry.user.id === currentUserId
           const tokens = activeTab === 'total' ? entry.totalTokens : entry.weeklyTokens
@@ -129,13 +137,19 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
                 {/* User Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-lg">{entry.user.avatar || '👤'}</span>
-                    <h3 className={`font-semibold truncate ${
-                      isCurrentUser ? 'text-[#0052FF]' : 'text-gray-900'
-                    }`}>
-                      {entry.user.username}
-                      {isCurrentUser && <span className="text-sm ml-1">(You)</span>}
-                    </h3>
+                    <BaseUser
+                      address={entry.user.walletAddress}
+                      username={entry.user.username}
+                      avatar={entry.user.avatar}
+                      showAvatar={true}
+                      showName={true}
+                      className=""
+                      avatarClassName="w-6 h-6"
+                      nameClassName={`font-semibold truncate ${
+                        isCurrentUser ? 'text-[#0052FF]' : 'text-gray-900'
+                      }`}
+                    />
+                    {isCurrentUser && <span className="text-sm text-[#0052FF]">(You)</span>}
                   </div>
                 </div>
 
@@ -148,7 +162,8 @@ export default function RankingsPage({ leaderboard, currentUserId }: RankingsPag
               </div>
             </div>
           )
-        })}
+          })
+        )}
       </div>
 
       {/* Bottom Padding for Navigation */}
